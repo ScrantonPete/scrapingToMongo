@@ -68,7 +68,7 @@ db.once("open", function() {
 
 //GET requests to render Handlebars pages
 app.get("/", function(req, res) {
-  Article.find({ stored: false }, function(error, data) {
+  Article.find({ saved: false }, function(error, data) {
     var hbsObject = {
       article: data
     };
@@ -77,14 +77,14 @@ app.get("/", function(req, res) {
   });
 });
 
-app.get("/stored", function(req, res) {
-  Article.find({ stored: true })
+app.get("/saved", function(req, res) {
+  Article.find({ saved: true })
     .populate("notes")
     .exec(function(error, articles) {
       var hbsObject = {
         article: articles
       };
-      res.render("sastoredved", hbsObject);
+      res.render("sasavedved", hbsObject);
     });
 });
 
@@ -179,9 +179,9 @@ app.get("/articles/:id", function(req, res) {
 });
 
 // Store an article
-app.post("/articles/store/:id", function(req, res) {
+app.post("/articles/save/:id", function(req, res) {
   // Use the article id to find and update its saved boolean
-  Article.findOneAndUpdate({ _id: req.params.id }, { stored: true })
+  Article.findOneAndUpdate({ _id: req.params.id }, { saved: true })
     // Execute the above query
     .exec(function(err, doc) {
       // Log any errors
@@ -197,7 +197,7 @@ app.post("/articles/store/:id", function(req, res) {
 // Remove an article
 app.post("/articles/remove/:id", function(req, res) {
   // Use the article id to find and update its saved boolean
-  Article.findOneAndUpdate({ _id: req.params.id }, { stored: false, notes: [] })
+  Article.findOneAndUpdate({ _id: req.params.id }, { saved: false, notes: [] })
     // Execute the above query
     .exec(function(err, doc) {
       // Log any errors
@@ -211,7 +211,7 @@ app.post("/articles/remove/:id", function(req, res) {
 });
 
 // Create a new note
-app.post("/notes/store/:id", function(req, res) {
+app.post("/notes/save/:id", function(req, res) {
   // Create a new note and pass the req.body to the entry
   var newNote = new Note({
     body: req.body.text,

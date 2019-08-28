@@ -16,11 +16,11 @@ $(".navbar-nav li").click(function() {
 });
 
 //Store Article button
-$(".store").on("click", function() {
+$(".save").on("click", function() {
   var thisId = $(this).attr("data-id");
   $.ajax({
     method: "POST",
-    url: "/articles/stored/" + thisId
+    url: "/articles/saved/" + thisId
   }).done(function(data) {
     window.location = "/";
   });
@@ -38,14 +38,14 @@ $(".remove").on("click", function() {
 });
 
 //Store Note button
-$(".storeNote").on("click", function() {
+$(".saveNote").on("click", function() {
   var thisId = $(this).attr("data-id");
   if (!$("#noteText" + thisId).val()) {
     alert("enter note");
   } else {
     $.ajax({
       method: "POST",
-      url: "/notes/stored/" + thisId,
+      url: "/notes/saved/" + thisId,
       data: {
         text: $("#noteText" + thisId).val()
       }
@@ -70,6 +70,6 @@ $(".removeNote").on("click", function() {
   }).done(function(data) {
     console.log(data);
     $(".modalNote").modal("hide");
-    window.location = "/stored";
+    window.location = "/saved";
   });
 });
