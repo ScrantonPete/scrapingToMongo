@@ -22,7 +22,6 @@ var port = process.env.PORT || 3000;
 // Initialize Express
 var app = express();
 
-// Use morgan and body parser with our app
 app.use(logger("dev"));
 app.use(
   bodyParser.urlencoded({
@@ -64,8 +63,6 @@ db.once("open", function() {
 });
 
 // Routes
-// ======
-
 //GET requests to render Handlebars pages
 app.get("/", function(req, res) {
   Article.find({ saved: false }, function(error, data) {
@@ -84,95 +81,69 @@ app.get("/saved", function(req, res) {
       var hbsObject = {
         article: articles
       };
-      res.render("sasavedved", hbsObject);
+      res.render("saved", hbsObject);
     });
 });
 
-// A GET request to scrape the echojs website
+// A GET request to scrape the website
 app.get("/scrape", function(req, res) {
-  // First, we grab the body of the html with request
-  request("https://www.deadspin.com/", function(error, response, html) {
-    // Then, we load that into cheerio and save it to $ for a shorthand selector
+  request("https://www.nationalenquirer.com/", function(error, response, html) {
     var $ = cheerio.load(html);
-    // Now, we grab every h2 within an article tag, and do the following:
+
     $("article").each(function(i, element) {
-      // Save an empty result object
       var result = {};
 
-      // Add the title and summary of every link, and save them as properties of the result object
-
-      summary = "";
-      if ($(this).find("ul").length) {
-        summary = $(this)
-          .find("li")
-          .first()
-          .text();
-      } else {
-        summary = $(this)
-          .find("p")
-          .text();
-      }
+      // Add the title and summary of every link
 
       result.title = $(this)
-        .find("h2")
+        .find(".promo-title")
         .text();
-      result.summary = summary;
-      result.link =
-        "https://www.deadspin.com" +
-        $(this)
-          .find("a")
-          .attr("href");
+      result.summary = $(this)
+        .find(".subtitle")
+        .text();
 
-      // Using our Article model, create a new entry
-      // This effectively passes the result object to the entry (and the title and link)
+      result.link = $(this)
+        .find("a")
+        .attr("href");
+
       var entry = new Article(result);
 
-      // Now, save that entry to the db
+      // Save that entry to the db
       entry.save(function(err, doc) {
-        // Log any errors
         if (err) {
           console.log(err);
-        }
-        // Or log the doc
-        else {
+        } else {
           console.log(doc);
         }
       });
     });
-    // Tell the browser that we finished scraping the text
+    // Display Scrape Complete message
     res.send("Scrape Complete");
   });
 });
 
 // This will get the articles we scraped from the mongoDB
 app.get("/articles", function(req, res) {
-  // Grab every doc in the Articles array
+  // Grab the Articles array
   Article.find({}, function(error, doc) {
-    // Log any errors
     if (error) {
       console.log(error);
-    }
-    // Or send the doc to the browser as a json object
-    else {
+    } else {
       res.json(doc);
     }
   });
 });
 
-// Grab an article by it's ObjectId
+// Grab an article Id
 app.get("/articles/:id", function(req, res) {
-  // Using the id passed in the id parameter, prepare a query that finds the matching one in our db...
   Article.findOne({ _id: req.params.id })
-    // ..and populate all of the notes associated with it
+    // populate notes
     .populate("note")
-    // now, execute our query
+
     .exec(function(error, doc) {
-      // Log any errors
       if (error) {
         console.log(error);
-      }
-      // Otherwise, send the doc to the browser as a json object
-      else {
+      } else {
         res.json(doc);
       }
     });
@@ -180,77 +151,61 @@ app.get("/articles/:id", function(req, res) {
 
 // Store an article
 app.post("/articles/save/:id", function(req, res) {
-  // Use the article id to find and update its saved boolean
-  Article.findOneAndUpdate({ _id: req.params.id }, { saved: true })
-    // Execute the above query
-    .exec(function(err, doc) {
-      // Log any errors
+  Article.findOneAndUpdate({ _id: req.params.id }, { saved: true }).exec(
+    function(err, doc) {
       if (err) {
         console.log(err);
       } else {
-        // Or send the document to the browser
         res.send(doc);
       }
-    });
+    }
+  );
 });
 
 // Remove an article
 app.post("/articles/remove/:id", function(req, res) {
-  // Use the article id to find and update its saved boolean
-  Article.findOneAndUpdate({ _id: req.params.id }, { saved: false, notes: [] })
-    // Execute the above query
-    .exec(function(err, doc) {
-      // Log any errors
-      if (err) {
-        console.log(err);
-      } else {
-        // Or send the document to the browser
-        res.send(doc);
-      }
-    });
+  Article.findOneAndUpdate(
+    { _id: req.params.id },
+    { saved: false, notes: [] }
+  ).exec(function(err, doc) {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(doc);
+    }
+  });
 });
 
 // Create a new note
 app.post("/notes/save/:id", function(req, res) {
-  // Create a new note and pass the req.body to the entry
   var newNote = new Note({
     body: req.body.text,
     article: req.params.id
   });
   console.log(req.body);
-  // And save the new note the db
+  // save the new note the db
   newNote.save(function(error, note) {
-    // Log any errors
     if (error) {
       console.log(error);
-    }
-    // Otherwise
-    else {
-      // Use the article id to find and update it's notes
+    } else {
       Article.findOneAndUpdate(
         { _id: req.params.id },
         { $push: { notes: note } }
-      )
-        // Execute the above query
-        .exec(function(err) {
-          // Log any errors
-          if (err) {
-            console.log(err);
-            res.send(err);
-          } else {
-            // Or send the note to the browser
-            res.send(note);
-          }
-        });
+      ).exec(function(err) {
+        if (err) {
+          console.log(err);
+          res.send(err);
+        } else {
+          res.send(note);
+        }
+      });
     }
   });
 });
 
 // Remove a note
 app.delete("/notes/remove/:note_id/:article_id", function(req, res) {
-  // Use the note id to find and delete it
   Note.findOneAndRemove({ _id: req.params.note_id }, function(err) {
-    // Log any errors
     if (err) {
       console.log(err);
       res.send(err);
@@ -258,18 +213,14 @@ app.delete("/notes/remove/:note_id/:article_id", function(req, res) {
       Article.findOneAndUpdate(
         { _id: req.params.article_id },
         { $pull: { notes: req.params.note_id } }
-      )
-        // Execute the above query
-        .exec(function(err) {
-          // Log any errors
-          if (err) {
-            console.log(err);
-            res.send(err);
-          } else {
-            // Or send the note to the browser
-            res.send("Note Removed");
-          }
-        });
+      ).exec(function(err) {
+        if (err) {
+          console.log(err);
+          res.send(err);
+        } else {
+          res.send("Note Removed");
+        }
+      });
     }
   });
 });
