@@ -8,7 +8,8 @@ var Schema = mongoose.Schema;
 var ArticleSchema = new Schema({
   title: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   },
   summary: {
     type: String
@@ -18,11 +19,12 @@ var ArticleSchema = new Schema({
     type: String,
     required: true
   },
+  date: String,
   saved: {
     type: Boolean,
     default: false
   },
-  notes: [
+  note: [
     {
       type: Schema.Types.ObjectId,
       ref: "Note"

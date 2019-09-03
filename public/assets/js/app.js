@@ -1,75 +1,116 @@
-//Handle Scrape button
-$("#scrape").on("click", function() {
-  $.ajax({
-    method: "GET",
-    url: "/scrape"
-  }).done(function(data) {
-    console.log(data);
-    window.location = "/";
+$(document).ready(function() {
+  var $winwidth = $(window).width();
+  $("img.main-img").attr({
+    width: $winwidth
   });
-});
-
-//Set click nav option to active
-$(".navbar-nav li").click(function() {
-  $(".navbar-nav li").removeClass("active");
-  $(this).addClass("active");
-});
-
-//Store Article button
-$(".save").on("click", function() {
-  var thisId = $(this).attr("data-id");
-  $.ajax({
-    method: "POST",
-    url: "/articles/saved/" + thisId
-  }).done(function(data) {
-    window.location = "/";
+  $(window).bind("resize", function() {
+    var $winwidth = $(window).width();
+    $("img.main-img").attr({
+      width: $winwidth
+    });
   });
-});
 
-//Remove Article button
-$(".remove").on("click", function() {
-  var thisId = $(this).attr("data-id");
-  $.ajax({
-    method: "POST",
-    url: "/articles/delete/" + thisId
-  }).done(function(data) {
-    window.location = "/saved";
+  $(".scrape").click(function(event) {
+    event.preventDefault();
+    $.get("/api/fetch").then(function(data) {
+      $(".articles").remove();
+      $.get("/").then(function() {
+        bootbox.alert(
+          "<h3 class='text-center m-top-80'>" + data.message + "<h3>",
+          function(result) {
+            location.reload();
+          }
+        );
+      });
+      //location.reload();
+    });
   });
-});
 
-//Store Note button
-$(".saveNote").on("click", function() {
-  var thisId = $(this).attr("data-id");
-  if (!$("#noteText" + thisId).val()) {
-    alert("enter note");
-  } else {
+  $(".save-article").click(function() {
+    var articleToSave = {};
+    articleToSave.id = $(this).data("id");
+    articleToSave.saved = true;
+    $.ajax({
+      method: "PATCH",
+      url: "/api/articles",
+      data: articleToSave
+    }).then(function(data) {
+      location.reload();
+    });
+  });
+
+  $(".removeSaved").click(function() {
+    var articleToremoveSaved = {};
+    articleToremoveSaved.id = $(this).data("id");
+    articleToremoveSaved.saved = false;
+    $.ajax({
+      method: "PATCH",
+      url: "/api/articles",
+      data: articleToremoveSaved
+    }).then(function(data) {
+      location.reload();
+    });
+  });
+
+  $(".saved-buttons").on("click", function() {
+    // the NEWS article id
+    var thisId = $(this).attr("data-value");
+
+    //attach news article _id to the save button in the modal for use in save post
+    $("#saveButton").attr({ "data-value": thisId });
+
+    //make an ajax call for the notes attached to this article
+    $.get("/notes/" + thisId, function(data) {
+      console.log(data);
+      //empty modal title, textarea and notes
+      $("#noteModalLabel").empty();
+      $("#notesBody").empty();
+      $("#notestext").val("");
+
+      //delete button for individual note
+
+      //add id of the current NEWS article to modal label
+      $("#noteModalLabel").append(" " + thisId);
+      //add notes to body of modal, will loop through if multiple notes
+      for (var i = 0; i < data.note.length; i++) {
+        var button =
+          " <a href=/deleteNote/" +
+          data.note[i]._id +
+          '><i class="pull-right fa fa-times fa-2x deletex" aria-hidden="true"></i></a>';
+        $("#notesBody").append(
+          '<div class="panel panel-default"><div class="noteText panel-body">' +
+            data.note[i].body +
+            "  " +
+            button +
+            "</div></div>"
+        );
+      }
+    });
+  });
+
+  // When you click the savenote button
+  $(".savenote").click(function() {
+    // Grab the id associated with the article from the submit button
+    var thisId = $(this).attr("data-value");
+
+    // Run a POST request to change the note, using what's entered in the inputs
     $.ajax({
       method: "POST",
-      url: "/notes/saved/" + thisId,
+      url: "/notes/" + thisId,
       data: {
-        text: $("#noteText" + thisId).val()
-      }
-    }).done(function(data) {
-      // Log the response
-      console.log(data);
-      // Empty the notes section
-      $("#noteText" + thisId).val("");
-      $(".modalNote").modal("hide");
-      window.location = "/saved";
-    });
-  }
-});
+        // Value taken from title input
 
-//Remove Note button
-$(".removeNote").on("click", function() {
-  var noteId = $(this).attr("data-note-id");
-  var articleId = $(this).attr("data-article-id");
-  $.ajax({
-    method: "DELETE",
-    url: "/notes/remove/" + noteId + "/" + articleId
-  }).done(function(data) {
-    console.log(data);
-    $(".modalNote").modal("hide");
-    window.location = "/saved";
+        // Value taken from note textarea
+        body: $("#notestext")
+          .val()
+          .trim()
+      }
+    })
+      // With that done
+      .done(function(data) {
+        // Log the response
+        //console.log(data);
+        $("#noteModal").modal("hide");
+      });
   });
 });

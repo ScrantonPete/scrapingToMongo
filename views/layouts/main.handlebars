@@ -3,46 +3,44 @@
 
 <head>
     <meta charset="UTF-8">
-    <!--jQuery Link-->
-    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-    <!--Bootstrap Links-->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-        crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-        crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-        crossorigin="anonymous"></script>
+    <title>National Enquirer Mongo Scraper</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto%7CRoboto+Slab" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-    <!--CSS Style Sheet-->
-    <link rel="stylesheet" href="/assets/css/style.css" type="text/css" />
 
-    <title>National Enquirer Scraper!</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/style.css">
 </head>
 
 <body>
-    <nav class="navbar navbar-default navbar-fixed-top">
-        <div class="container">
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
             <div class="navbar-header">
-                <a class="navbar-brand" href="/">National Enquirer Scraper</a>
+                <a class="navbar-brand" href="/">National Enquirer Mongo Scraper</a>
             </div>
-            <div id="navbar" class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/saved">Stored Articles</a></li>
-                    <li><button type="button" class="btn btn-primary" id="scrape">Scrape Articles</button></li>
-                </ul>
-            </div>
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="/">Home <span class="sr-only">(current)</span></a></li>
+                <li><a id="saved" href="/saved">Saved Articles</a></li>
+            </ul>
+            <form class="navbar-form navbar-left" action="/api/fetch" method="get">
+                <button class="btn btn-danger scrape">Scrape more Articles!</button>
+            </form>
         </div>
     </nav>
+    <div class="main-img-container">
+        <img class="main-img" src="../../assets/images/download.jpg" alt="header-image-national-enquirer" />
+    </div>
+
+
     {{{ body }}}
 
-    <!--External JS Link-->
-    <script src="/public/assets/js/app.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.4.0/bootbox.min.js"></script>
+    <script src="assets/js/app.js"></script>
+
 </body>
 
 </html>
