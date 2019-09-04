@@ -21,7 +21,7 @@ app.use(
 );
 
 // Make Static Directory
-app.use(express.static(process.cwd() + "/public"));
+app.use(express.static("public"));
 
 // Configure Mongoose
 var MONGODB_URI =
