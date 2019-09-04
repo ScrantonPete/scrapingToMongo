@@ -24,9 +24,11 @@ app.use(
 app.use(express.static("public"));
 
 // Configure Mongoose
+console.log(process.env.MONGODB_URI);
 var MONGODB_URI =
   process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
 
+console.log(process.env.MONGODB_URI);
 mongoose.connect(MONGODB_URI);
 
 var db = mongoose.connection;
